@@ -1,0 +1,16 @@
+local def_height = 4
+local h_diff = 25
+local current_height = 0
+-- некрасиво но пока так
+function init(self)
+	math.randomseed(os.time() * os.clock())
+	add_platform(vmath.vector3(0, current_height, 0), vmath.vector3(1000, def_height, 0))
+	
+
+end
+
+function add_platform(position, size, rotation)
+	position.y = position.y
+	factory.create("#platformfactory", position, rotation, { start_size = size })
+	current_height = current_height + h_diff
+end

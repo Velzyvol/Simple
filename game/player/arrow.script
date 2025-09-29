@@ -1,0 +1,8 @@
+function on_message(self, message_id, message, sender)
+	if message_id == hash("update_angle") then
+		local angle = -message.angle_arrow
+		local radius = 18
+		go.set_position(vmath.vector3(math.cos(angle)*radius,math.sin(angle)*radius,0))
+		go.set_rotation(vmath.quat_rotation_z(angle))
+	end
+end

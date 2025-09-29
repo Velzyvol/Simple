@@ -1,0 +1,4 @@
+function init(self)
+	--collectionfactory.create("#playerfactory", vmath.vector3(-5,110,0), nil, { [hash("/player")] = { player_type = hash("p1") } })
+	collectionfactory.create("#playerfactory", vmath.vector3(5,10,0), nil, { [hash("/player")] = { player_type = hash("p2") } })
+end

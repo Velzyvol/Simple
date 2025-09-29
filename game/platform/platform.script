@@ -1,0 +1,10 @@
+go.property("start_size", vmath.vector3(0,0,0))
+
+function init(self)
+	go.set("#sprite", "size", self.start_size)
+	
+	physics.set_shape("#collisionobject", "box", {
+		type = physics.SHAPE_TYPE_BOX,
+		dimensions = vmath.vector3(self.start_size.x, self.start_size.y, 5)
+	})
+end

@@ -1,0 +1,37 @@
+function math.clamp(n, min, max) return math.min(math.max(n, min), max) end
+
+function vmath.screen_to_world(x, y, z, proj, view)
+	local DISPLAY_WIDTH = sys.get_config_int("display.width")
+	local DISPLAY_HEIGHT = sys.get_config_int("display.height")
+	local w, h = window.get_size()
+
+	w = w / (w / DISPLAY_WIDTH)
+	h = h / (h / DISPLAY_HEIGHT)
+
+	local inv = vmath.inv(proj * view)
+	x = (2 * x / w) - 1
+	y = (2 * y / h) - 1
+	z = (2 * z) - 1
+	local x1 = x * inv.m00 + y * inv.m01 + z * inv.m02 + inv.m03
+	local y1 = x * inv.m10 + y * inv.m11 + z * inv.m12 + inv.m13
+	local z1 = x * inv.m20 + y * inv.m21 + z * inv.m22 + inv.m23
+
+	return vmath.vector3(x1, y1, z1)
+end
+
+function vmath.mirror_angle(rad)
+	return math.pi*2 - rad
+end
+
+function math.lerp(a, b, t)
+	return a + (b - a) * t
+end
+
+function math.hex2vector4(hex, alpha)
+	alpha = alpha or 1.0
+	local r = tonumber(hex:sub(2, 3), 16) / 255
+	local g = tonumber(hex:sub(4, 5), 16) / 255
+	local b = tonumber(hex:sub(6, 7), 16) / 255
+	return vmath.vector4(r, g, b, alpha)
+end
+

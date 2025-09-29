@@ -1,0 +1,24 @@
+name: "main"
+scale_along_z: 0
+embedded_instances {
+  id: "helpers"
+  data: "components {\n"
+  "  id: \"helpers\"\n"
+  "  component: \"/game/main/helpers.script\"\n"
+  "}\n"
+  ""
+}
+embedded_instances {
+  id: "main"
+  data: "components {\n"
+  "  id: \"main\"\n"
+  "  component: \"/game/main/main.script\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"collectionproxy\"\n"
+  "  type: \"collectionproxy\"\n"
+  "  data: \"collection: \\\"/game/level/level.collection\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
+}

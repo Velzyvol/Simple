@@ -1,0 +1,9 @@
+images {
+  image: "/resources/sprites/platform.png"
+}
+images {
+  image: "/resources/sprites/player.png"
+}
+images {
+  image: "/resources/sprites/arrow.png"
+}

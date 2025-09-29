@@ -1,0 +1,13 @@
+name: "player"
+instances {
+  id: "player"
+  prototype: "/game/player/player.go"
+}
+instances {
+  id: "arrow"
+  prototype: "/game/player/arrow.go"
+  position {
+    y: 11.0
+  }
+}
+scale_along_z: 0

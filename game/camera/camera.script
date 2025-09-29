@@ -1,0 +1,90 @@
+local pc = require("game.player.player_config")
+
+local BASE_WIDTH = sys.get_config_int("display.width")
+local BASE_HEIGHT = sys.get_config_int("display.height")
+
+local ZOOM_FACTOR = 1.1
+local BASE_MAX_ZOOM = 2
+local BASE_MIN_ZOOM = 1e-6
+local BASE_DISTANCE = 180 -- базовое расстояние между игроками
+
+local camera_path = "#camera"
+
+function init(self)
+	self.zoom = BASE_MAX_ZOOM
+	self.target_zoom = BASE_MAX_ZOOM
+	self.scale = 1
+
+	-- Сглаженные значения
+	self.target_position = vmath.vector3(0, 0, 0)
+	self.target_distance = 0
+
+	window.set_listener(window_listener)
+	update_camera(self, BASE_WIDTH, BASE_HEIGHT)
+end
+
+function fixed_update(self, dt)
+	local p1_pos = pc.position[hash("p1")]
+	local p2_pos = pc.position[hash("p2")]
+
+	if not (p1_pos and p2_pos) then
+		return
+	end
+
+	local players_difference = math.abs(p1_pos.y - p2_pos.y)
+	self.target_distance = math.lerp(self.target_distance, players_difference, dt * 5)
+
+	local desired_zoom = BASE_MAX_ZOOM * (BASE_DISTANCE / math.max(self.target_distance, 1))
+	desired_zoom = math.clamp(desired_zoom, BASE_MIN_ZOOM, BASE_MAX_ZOOM)
+
+	self.target_zoom = math.lerp(self.target_zoom, desired_zoom, dt * 3)
+	self.zoom = math.lerp(self.zoom, self.target_zoom, dt * 5)
+
+	-- Обновляем zoom камеры
+	local width, height = window.get_size()
+	self.scale = math.min(width / BASE_WIDTH, height / BASE_HEIGHT)
+	go.set(camera_path, "orthographic_zoom", self.zoom * self.scale)
+
+	local mid_y = (p1_pos.y + p2_pos.y) / 2
+	self.target_position.y = math.lerp(self.target_position.y, mid_y, dt * 5)
+
+	local current_pos = go.get_position()
+	local delta = math.abs(self.target_position.y - current_pos.y)
+
+	-- мёртвая зона: если разница меньше 5px, не двигаем камеру
+	if delta > 5 then
+		local new_y = math.lerp(current_pos.y, self.target_position.y, dt * 3)
+		go.set_position(vmath.vector3(0, new_y, 0))
+	end
+end
+
+function update_camera(self, width, height)
+	self.scale = math.min(width / BASE_WIDTH, height / BASE_HEIGHT)
+	go.set(camera_path, "orthographic_zoom", self.zoom * self.scale)
+	self.proj = camera.get_projection(camera_path)
+	self.view = camera.get_view(camera_path)
+end
+
+function zoom_in(self)
+	self.zoom = self.zoom * ZOOM_FACTOR
+	self.zoom = math.clamp(self.zoom, BASE_MIN_ZOOM, BASE_MAX_ZOOM)
+	local width, height = window.get_size()
+	self.scale = math.min(width / BASE_WIDTH, height / BASE_HEIGHT)
+	go.animate(camera_path, "orthographic_zoom", go.PLAYBACK_ONCE_FORWARD,
+	self.zoom * self.scale, go.EASING_OUTQUAD, 0.15)
+end
+
+function zoom_out(self)
+	self.zoom = self.zoom / ZOOM_FACTOR
+	self.zoom = math.clamp(self.zoom, BASE_MIN_ZOOM, BASE_MAX_ZOOM)
+	local width, height = window.get_size()
+	self.scale = math.min(width / BASE_WIDTH, height / BASE_HEIGHT)
+	go.animate(camera_path, "orthographic_zoom", go.PLAYBACK_ONCE_FORWARD,
+	self.zoom * self.scale, go.EASING_OUTQUAD, 0.15)
+end
+
+function window_listener(self, event, data)
+	if event == window.WINDOW_EVENT_RESIZED then
+		update_camera(self, data.width, data.height)
+	end
+end
